@@ -10,6 +10,12 @@ if (!canCreatePost()) {
 
 $title   = trim($_POST['title']   ?? '');
 $content = trim($_POST['content'] ?? '');
+$csrf    = $_POST['_csrf'] ?? '';
+
+if (!validateCsrfToken($csrf)) {
+    header('Location: /rbac_project/pages/posts.php');
+    exit;
+}
 
 if ($title && $content) {
     $db = getDB();

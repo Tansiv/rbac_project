@@ -11,34 +11,39 @@ $error   = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['_csrf'] ?? '')) {
+        $error = 'Invalid form submission.';
+    }
     $username = trim($_POST['username'] ?? '');
     $email    = trim($_POST['email']    ?? '');
     $password = $_POST['password']      ?? '';
     $confirm  = $_POST['confirm']       ?? '';
 
-    if (!$username || !$email || !$password || !$confirm) {
-        $error = 'Please fill in all fields.';
-    } elseif (strlen($username) < 3) {
-        $error = 'Username must be at least 3 characters.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Please enter a valid email address.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
-    } elseif ($password !== $confirm) {
-        $error = 'Passwords do not match.';
-    } else {
-        $db = getDB();
-        // Check duplicate
-        $s = $db->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
-        $s->execute([$username, $email]);
-        if ($s->fetch()) {
-            $error = 'Username or email already taken.';
+    if (!$error) {
+        if (!$username || !$email || !$password || !$confirm) {
+            $error = 'Please fill in all fields.';
+        } elseif (strlen($username) < 3) {
+            $error = 'Username must be at least 3 characters.';
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = 'Please enter a valid email address.';
+        } elseif (strlen($password) < 6) {
+            $error = 'Password must be at least 6 characters.';
+        } elseif ($password !== $confirm) {
+            $error = 'Passwords do not match.';
         } else {
-            $hash = password_hash($password, PASSWORD_DEFAULT);
-            // New users get Regular User role (id=3) by default
-            $ins = $db->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 3)");
-            $ins->execute([$username, $email, $hash]);
-            $success = 'Account created! You can now <a href="/rbac_project/pages/login.php">login</a>.';
+            $db = getDB();
+            // Check duplicate
+            $s = $db->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+            $s->execute([$username, $email]);
+            if ($s->fetch()) {
+                $error = 'Username or email already taken.';
+            } else {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                // New users get Regular User role (id=3) by default
+                $ins = $db->prepare("INSERT INTO users (username, email, password, role_id) VALUES (?, ?, ?, 3)");
+                $ins->execute([$username, $email, $hash]);
+                $success = 'Account created! You can now <a href="/rbac_project/pages/login.php">login</a>.';
+            }
         }
     }
 }
@@ -69,6 +74,7 @@ $pageTitle = 'Register — RBAC App';
             <div class="alert alert-success"><?= $success ?></div>
         <?php endif; ?>
         <form method="POST">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
             <div class="form-group">
                 <label class="form-label">Username</label>
                 <input class="form-input" type="text" name="username" placeholder="e.g. johndoe" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required/>

@@ -15,6 +15,12 @@ if (!canCreateComment()) {
 
 $postId  = intval($_POST['post_id'] ?? 0);
 $content = trim($_POST['content'] ?? '');
+$csrf    = $_POST['_csrf'] ?? '';
+
+if (!validateCsrfToken($csrf)) {
+    echo json_encode(['error' => 'Invalid CSRF token']);
+    exit;
+}
 
 if (!$postId || !$content) {
     echo json_encode(['error' => 'Missing required fields']);

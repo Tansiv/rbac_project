@@ -9,6 +9,11 @@ if (!isLoggedIn()) {
 }
 
 $commentId = intval($_POST['comment_id'] ?? 0);
+$csrf      = $_POST['_csrf'] ?? '';
+if (!validateCsrfToken($csrf)) {
+    echo json_encode(['error' => 'Invalid CSRF token']);
+    exit;
+}
 if (!$commentId) {
     echo json_encode(['error' => 'Invalid comment ID']);
     exit;

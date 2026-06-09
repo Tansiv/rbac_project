@@ -9,7 +9,31 @@ function isLoggedIn() {
 }
 
 function currentUser() {
-    return $_SESSION ?? [];
+    return [
+        'user_id'  => $_SESSION['user_id'] ?? null,
+        'username' => $_SESSION['username'] ?? null,
+        'email'    => $_SESSION['email'] ?? null,
+        'role'     => $_SESSION['role'] ?? 'guest',
+    ];
+}
+
+function generateCsrfToken() {
+    if (!isset($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+function validateCsrfToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], (string)$token);
+}
+
+function loginUser(array $user) {
+    session_regenerate_id(true);
+    $_SESSION['user_id']  = $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['email']    = $user['email'];
+    $_SESSION['role']     = $user['role'];
 }
 
 function requireLogin() {

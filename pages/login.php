@@ -12,17 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    if ($username && $password) {
+    if (!validateCsrfToken($_POST['_csrf'] ?? '')) {
+        $error = 'Invalid form submission.';
+    } elseif ($username && $password) {
         $db   = getDB();
         $stmt = $db->prepare("SELECT u.*, r.name AS role FROM users u JOIN roles r ON u.role_id = r.id WHERE u.username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            $_SESSION['user_id']  = $user['id'];
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['role']     = $user['role'];
-            $_SESSION['email']    = $user['email'];
+            loginUser($user);
             header('Location: /rbac_project/pages/posts.php');
             exit;
         } else {
@@ -56,6 +55,7 @@ $pageTitle = 'Login — RBAC App';
             <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <form method="POST">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
             <div class="form-group">
                 <label class="form-label">Username</label>
                 <input class="form-input" type="text" name="username" placeholder="e.g. alice" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required/>

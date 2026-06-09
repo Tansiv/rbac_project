@@ -9,6 +9,11 @@ if (!isLoggedIn()) {
 }
 
 $postId = intval($_POST['post_id'] ?? 0);
+$csrf   = $_POST['_csrf'] ?? '';
+if (!validateCsrfToken($csrf)) {
+    echo json_encode(['error' => 'Invalid CSRF token']);
+    exit;
+}
 if (!$postId) {
     echo json_encode(['error' => 'Invalid post ID']);
     exit;

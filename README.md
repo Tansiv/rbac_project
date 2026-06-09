@@ -14,13 +14,11 @@
 
 <br/>
 
-> A full-stack Role-Based Access Control web application built with **PHP**, **MySQL**, **HTML/CSS**, and **Vanilla JavaScript** — featuring 4 distinct user roles, session-based authentication, and a real-time commenting system.
+> A full-stack **Role-Based Access Control** web application built with **PHP**, **MySQL**, **HTML/CSS**, and **Vanilla JavaScript** — featuring 4 distinct user roles, session-based authentication, and a real-time commenting system with fine-grained permission enforcement.
 
 <br/>
 
-![RBAC App Demo](https://raw.githubusercontent.com/YOUR_USERNAME/rbac_project/main/assets/demo/demo.gif)
-
-> 📌 *Replace the GIF above with a screen recording of your app using [ScreenToGif](https://www.screentogif.com/) — record the login, post creation, and permission flow.*
+![App Interface](assets/demo/Interface.png)
 
 </div>
 
@@ -29,13 +27,13 @@
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
+- [Live Screenshots](#-live-screenshots)
 - [Features](#-features)
 - [Role & Permission Matrix](#-role--permission-matrix)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [Getting Started](#-getting-started)
 - [Database Schema](#-database-schema)
-- [Screenshots](#-screenshots)
 - [Demo Accounts](#-demo-accounts)
 - [Author](#-author)
 
@@ -43,26 +41,58 @@
 
 ## 🔍 Overview
 
-This project demonstrates a complete **Role-Based Access Control (RBAC)** system where different users have different levels of access to resources. Built as a hiring assessment for a Full Stack Developer role, it showcases:
+This project demonstrates a complete **Role-Based Access Control (RBAC)** system where different users have different levels of access to resources. Built as a Full Stack Developer hiring assessment, it showcases:
 
-- Secure **session-based authentication** with password hashing
+- Secure **session-based authentication** with bcrypt password hashing
 - A **4-tier role hierarchy** enforced on both frontend and backend
-- **Real-time AJAX** interactions for comments without page reload
-- Clean **MVC-inspired** architecture using PHP includes and a centralized permission layer
-- A **colorful, modern UI** built entirely with vanilla CSS — no frameworks
+- **Real-time AJAX** interactions — comments add and delete without page reload
+- A centralized **permission layer** (`auth.php`) that governs every action
+- A **colorful, modern UI** built entirely with vanilla CSS — zero frameworks
+
+---
+
+## 📸 Live Screenshots
+
+### 🔐 Login Page
+> Secure session-based login with demo account reference panel
+
+![Login Page](assets/demo/login.png)
+
+---
+
+### 📋 Posts Feed
+> Main dashboard — create, edit, and delete posts based on your role
+
+![Posts Feed](assets/demo/Post.png)
+
+---
+
+### 💬 Comments System
+> Real-time AJAX commenting with fine-grained per-role delete permissions
+
+![Comments](assets/demo/comments.png)
+
+---
+
+### 👥 User Management
+> Super Admin exclusive panel — change roles or remove users entirely
+
+![User Management](assets/demo/user.png)
 
 ---
 
 ## ✨ Features
 
-- 🔐 **Authentication** — Register, login, logout with `password_hash` / `password_verify`
+- 🔐 **Authentication** — Register, login, logout with `password_hash` / `password_verify` (bcrypt)
 - 👥 **4 User Roles** — Super Admin, Moderator, Regular User, Guest
-- 📝 **Posts** — Create, edit, delete with ownership enforcement
+- 📝 **Posts** — Create, edit, delete with strict ownership enforcement
 - 💬 **Comments** — Add and delete with fine-grained permission logic
-- ⚡ **AJAX Comments** — Live add/delete without page refresh
-- 🛡️ **User Management** — Super Admin can change any user's role or delete them
-- 🎨 **Modern UI** — Gradient accents, role badges, toast notifications, confirm modals
-- 📱 **Responsive** — Works on desktop and mobile
+- ⚡ **AJAX Comments** — Live add/delete without any page refresh
+- 🛡️ **User Management** — Super Admin can promote, demote, or delete any user
+- 🔔 **Toast Notifications** — Real-time feedback on every action
+- ✅ **Confirm Modals** — Safe delete flow with confirmation dialogs
+- 🎨 **Modern UI** — Gradient accents, role-colored badges, responsive layout
+- 📱 **Responsive** — Works cleanly on desktop and mobile
 
 ---
 
@@ -73,23 +103,24 @@ This project demonstrates a complete **Role-Based Access Control (RBAC)** system
 | View posts & comments | ✅ | ✅ | ✅ | ✅ |
 | Create a post | ✅ | ✅ | ✅ | ❌ |
 | Edit own post | ✅ | ❌ | ✅ | ❌ |
-| Delete any post | ✅ | ✅ | ❌ | ❌ |
-| Delete own post | ✅ | ✅ | ✅ | ❌ |
+| Delete **any** post | ✅ | ✅ | ❌ | ❌ |
+| Delete **own** post | ✅ | ✅ | ✅ | ❌ |
 | Create a comment | ✅ | ✅ | ✅ | ❌ |
-| Delete own comment | ✅ | ✅ | ✅ | ❌ |
-| Delete comment on own post | ✅ | ✅ | ✅ | ❌ |
-| Delete any comment | ✅ | ✅ | ❌ | ❌ |
-| Manage users (roles/delete) | ✅ | ❌ | ❌ | ❌ |
+| Delete **own** comment | ✅ | ✅ | ✅ | ❌ |
+| Delete comment on **own post** | ✅ | ✅ | ✅ | ❌ |
+| Delete **any** comment | ✅ | ✅ | ❌ | ❌ |
+| Manage users (roles / delete) | ✅ | ❌ | ❌ | ❌ |
 
-### Comment Permission Logic
+### 💬 Comment Permission Logic
 
 ```
-If User A creates a post and User B comments on it:
-  ✅ User A  (post owner)    → can delete User B's comment
-  ✅ User B  (comment owner) → can delete their own comment
-  ❌ User C  (anyone else)   → cannot delete User B's comment
-  ✅ Moderator               → can delete any comment
-  ✅ Super Admin             → can delete anything
+Scenario: User A creates a post → User B comments on it
+
+  ✅ User A  (post owner)     → can delete User B's comment
+  ✅ User B  (comment author) → can delete their own comment
+  ❌ User C  (any other user) → cannot delete User B's comment
+  ✅ Moderator                → can delete any comment
+  ✅ Super Admin              → can delete absolutely anything
 ```
 
 ---
@@ -98,10 +129,11 @@ If User A creates a post and User B comments on it:
 
 | Layer | Technology |
 |---|---|
-| **Backend** | PHP 8.x (plain, no framework) |
-| **Database** | MySQL 8 via PDO |
-| **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Auth** | PHP Sessions + `password_hash` (bcrypt) |
+| **Backend** | PHP 8.x — plain, no framework |
+| **Database** | MySQL 8 via PDO (prepared statements) |
+| **Frontend** | HTML5, CSS3, Vanilla JavaScript (ES6+) |
+| **Authentication** | PHP Sessions + `password_hash` (bcrypt) |
+| **AJAX** | Fetch API → JSON endpoints |
 | **Server** | Apache via XAMPP |
 | **Fonts** | Google Fonts — Inter, Space Grotesk |
 
@@ -112,35 +144,42 @@ If User A creates a post and User B comments on it:
 ```
 rbac_project/
 │
-├── index.php                  # Root redirect
-├── database.sql               # Full DB schema + seed data
+├── index.php                   # Root redirect to posts feed
+├── database.sql                # Full DB schema + demo seed data
+├── .gitignore
 ├── README.md
 │
-├── includes/                  # Shared core modules
-│   ├── db.php                 # PDO database connection (singleton)
-│   ├── auth.php               # Session helpers + permission functions
-│   ├── header.php             # Global navbar HTML
-│   └── footer.php             # Global footer HTML
+├── includes/                   # Shared core modules
+│   ├── db.php                  # PDO singleton connection
+│   ├── auth.php                # Session helpers + all permission functions
+│   ├── header.php              # Global navbar HTML
+│   └── footer.php              # Global footer + JS include
 │
-├── pages/                     # User-facing pages
-│   ├── login.php              # Login form + session creation
-│   ├── register.php           # Registration (assigns Regular User role)
-│   ├── logout.php             # Session destroy + redirect
-│   ├── posts.php              # Main feed — posts + comments
-│   ├── edit_post.php          # Edit post (owner / super admin only)
-│   └── users.php              # User management (Super Admin only)
+├── pages/                      # User-facing pages
+│   ├── login.php               # Login form + session creation
+│   ├── register.php            # Registration (assigns Regular User role)
+│   ├── logout.php              # Session destroy + redirect
+│   ├── posts.php               # Main feed — posts + comments
+│   ├── edit_post.php           # Edit post (owner or Super Admin only)
+│   └── users.php               # User management (Super Admin only)
 │
-├── api/                       # AJAX JSON endpoints
-│   ├── create_post.php        # POST → insert new post
-│   ├── delete_post.php        # POST → delete post (permission checked)
-│   ├── add_comment.php        # POST → insert comment, returns JSON
-│   └── delete_comment.php     # POST → delete comment (permission checked)
+├── api/                        # AJAX JSON endpoints
+│   ├── create_post.php         # POST → insert new post
+│   ├── delete_post.php         # POST → delete post (permission checked)
+│   ├── add_comment.php         # POST → insert comment, returns JSON
+│   └── delete_comment.php      # POST → delete comment (permission checked)
 │
 └── assets/
     ├── css/
-    │   └── style.css          # Full custom design system
-    └── js/
-        └── main.js            # AJAX helpers, toast, confirm modal
+    │   └── style.css           # Full custom design system (no frameworks)
+    ├── js/
+    │   └── main.js             # AJAX helpers, toast, confirm modal
+    └── demo/                   # Screenshots used in this README
+        ├── Interface.png
+        ├── login.png
+        ├── Post.png
+        ├── comments.png
+        └── user.png
 ```
 
 ---
@@ -149,7 +188,7 @@ rbac_project/
 
 ### Prerequisites
 
-- [XAMPP](https://www.apachefriends.org/) (Apache + MySQL + PHP 8.x)
+- [XAMPP](https://www.apachefriends.org/) — Apache + MySQL + PHP 8.x
 - [VS Code](https://code.visualstudio.com/)
 - [Git](https://git-scm.com/)
 
@@ -173,18 +212,18 @@ Open **XAMPP Control Panel** → Start **Apache** and **MySQL**
 
 **4. Import the database**
 
-- Go to `http://localhost/phpmyadmin`
+- Open `http://localhost/phpmyadmin`
 - Create a new database named `rbac_project`
 - Click **Import** → select `database.sql` → click **Go**
 
-**5. Configure database credentials** *(if needed)*
+**5. Configure database credentials** *(only if your MySQL has a password)*
 
-Open `includes/db.php` and update if your MySQL has a password:
+Open `includes/db.php`:
 
 ```php
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', '');        // Add your password here if set
+define('DB_PASS', '');        // ← add your MySQL password here if set
 define('DB_NAME', 'rbac_project');
 ```
 
@@ -199,48 +238,31 @@ http://localhost/rbac_project
 ## 🗄️ Database Schema
 
 ```sql
-users      → id, username, email, password (bcrypt), role_id, created_at
 roles      → id, name, label
+users      → id, username, email, password (bcrypt), role_id, created_at
 posts      → id, user_id, title, content, created_at, updated_at
 comments   → id, post_id, user_id, content, created_at
 ```
 
 **Relationships:**
 - `users.role_id` → `roles.id`
-- `posts.user_id` → `users.id` (CASCADE DELETE)
-- `comments.post_id` → `posts.id` (CASCADE DELETE)
-- `comments.user_id` → `users.id` (CASCADE DELETE)
-
----
-
-## 📸 Screenshots
-
-> 📌 *Add your own screenshots after running the project locally.*
-> Recommended: capture Login, Posts Feed, User Management, and mobile view.
-
-| Login Page | Posts Feed |
-|---|---|
-| ![Login](assets/demo/login.png) | ![Posts](assets/demo/posts.png) |
-
-| User Management | Comment Permissions |
-|---|---|
-| ![Users](assets/demo/users.png) | ![Comments](assets/demo/comments.png) |
-
-*To add screenshots: create an `assets/demo/` folder and place your images there.*
+- `posts.user_id` → `users.id` *(CASCADE DELETE)*
+- `comments.post_id` → `posts.id` *(CASCADE DELETE)*
+- `comments.user_id` → `users.id` *(CASCADE DELETE)*
 
 ---
 
 ## 🔑 Demo Accounts
 
-All demo accounts use the password: **`password`**
+All demo accounts share the password: **`password`**
 
-| Username | Role | Access Level |
+| Username | Role | What they can do |
 |---|---|---|
-| `superadmin` | Super Admin | Full access — delete anything, manage all users |
-| `moderator` | Moderator | Delete any post or comment, cannot manage users |
-| `alice` | Regular User | Create posts/comments, manage only own content |
-| `bob` | Regular User | Same as Alice — useful for testing comment permissions |
-| `guest` | Guest | View-only — cannot post or comment |
+| `superadmin` | ⬡ Super Admin | Full access — delete anything, manage all users and roles |
+| `moderator` | 🛡️ Moderator | Delete any post or comment — cannot manage users |
+| `alice` | 👤 Regular User | Create posts & comments, manage only her own content |
+| `bob` | 👤 Regular User | Same as Alice — useful for testing cross-user comment permissions |
+| `guest` | 👁️ Guest | View-only — cannot post, comment, or delete anything |
 
 ---
 
@@ -256,8 +278,8 @@ All demo accounts use the password: **`password`**
 
 <div align="center">
 
-Built with 💜 as a Full Stack Developer assessment task.
+Built with 💜 as a Full Stack Developer assessment — demonstrating RBAC architecture, session auth, and AJAX-driven UI in plain PHP + MySQL.
 
-⭐ If you found this helpful, consider starring the repository!
+⭐ Found this useful? Give it a star!
 
 </div>

@@ -66,6 +66,10 @@ function toggleCommentForm(postId) {
 async function ajaxPost(url, data) {
     const fd = new FormData();
     for (const [k, v] of Object.entries(data)) fd.append(k, v);
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (csrf && !fd.has('_csrf')) {
+        fd.append('_csrf', csrf);
+    }
     const r = await fetch(url, { method: 'POST', body: fd });
     return r.json();
 }

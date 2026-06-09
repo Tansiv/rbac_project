@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 -- ============================================
--- Seed demo users (password for all: Test@1234)
+-- Seed demo users (password for all: password)
 -- ============================================
 INSERT INTO users (username, email, password, role_id) VALUES
 ('superadmin', 'superadmin@demo.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1),

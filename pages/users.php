@@ -12,6 +12,10 @@ $db = getDB();
 
 // Handle role change
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_role'])) {
+    if (!validateCsrfToken($_POST['_csrf'] ?? '')) {
+        http_response_code(400);
+        die('Invalid CSRF token.');
+    }
     $uid    = intval($_POST['user_id']);
     $roleId = intval($_POST['role_id']);
     if ($uid !== $_SESSION['user_id']) { // cannot change own role
@@ -23,6 +27,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_role'])) {
 
 // Handle delete user
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
+    if (!validateCsrfToken($_POST['_csrf'] ?? '')) {
+        http_response_code(400);
+        die('Invalid CSRF token.');
+    }
     $uid = intval($_POST['user_id']);
     if ($uid !== $_SESSION['user_id']) {
         $db->prepare("DELETE FROM users WHERE id = ?")->execute([$uid]);
@@ -79,6 +87,7 @@ include __DIR__ . '/../includes/header.php';
                         <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
                             <!-- Change role form -->
                             <form method="POST" style="display:flex;gap:.35rem;align-items:center;">
+                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
                                 <input type="hidden" name="user_id" value="<?= $u['id'] ?>"/>
                                 <select name="role_id" class="form-select" style="padding:.3rem .6rem;font-size:.8rem;width:auto;">
                                     <?php foreach ($roles as $r): ?>
@@ -89,6 +98,7 @@ include __DIR__ . '/../includes/header.php';
                             </form>
                             <!-- Delete user form -->
                             <form method="POST" onsubmit="return confirm('Delete user <?= htmlspecialchars($u['username']) ?>? This will remove all their posts and comments.')">
+                                <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
                                 <input type="hidden" name="user_id" value="<?= $u['id'] ?>"/>
                                 <button type="submit" name="delete_user" class="btn btn-danger btn-sm">Delete</button>
                             </form>

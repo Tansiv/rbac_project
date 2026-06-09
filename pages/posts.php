@@ -122,6 +122,7 @@ include __DIR__ . '/../includes/header.php';
     <div class="modal" style="max-width:560px;">
         <div class="modal-title">✍️ Create New Post</div>
         <form method="POST" action="/rbac_project/api/create_post.php">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
             <div class="form-group" style="margin-top:.75rem;">
                 <label class="form-label">Title</label>
                 <input class="form-input" type="text" name="title" placeholder="Post title…" required/>

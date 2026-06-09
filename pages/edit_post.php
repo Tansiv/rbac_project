@@ -22,15 +22,20 @@ if (!canEditPost($post['user_id'])) {
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!validateCsrfToken($_POST['_csrf'] ?? '')) {
+        $error = 'Invalid form submission.';
+    }
     $title   = trim($_POST['title']   ?? '');
     $content = trim($_POST['content'] ?? '');
-    if (!$title || !$content) {
-        $error = 'Title and content are required.';
-    } else {
-        $upd = $db->prepare("UPDATE posts SET title = ?, content = ? WHERE id = ?");
-        $upd->execute([$title, $content, $postId]);
-        header('Location: /rbac_project/pages/posts.php');
-        exit;
+    if (!$error) {
+        if (!$title || !$content) {
+            $error = 'Title and content are required.';
+        } else {
+            $upd = $db->prepare("UPDATE posts SET title = ?, content = ? WHERE id = ?");
+            $upd->execute([$title, $content, $postId]);
+            header('Location: /rbac_project/pages/posts.php');
+            exit;
+        }
     }
 }
 
@@ -47,6 +52,7 @@ include __DIR__ . '/../includes/header.php';
             <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <form method="POST">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars(generateCsrfToken()) ?>"/>
             <div class="form-group">
                 <label class="form-label">Title</label>
                 <input class="form-input" type="text" name="title" value="<?= htmlspecialchars($post['title']) ?>" required/>
